@@ -19,9 +19,7 @@ module Minesweeper
       @minesweeper.num_rows.times do |row|
         @minesweeper.num_cols.times do |col|
           tile = printed_board[row][col]
-          if tile.unexplored
-            printed_board[row][col] = tile.flagged ? "F" : "*"
-          end
+          printed_board[row][col] = tile.ui_graphic
         end
       end
       printed_board.each { |row| p row }
