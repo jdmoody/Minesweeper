@@ -24,6 +24,7 @@ module Minesweeper
       end
       printed_board.each { |row| p row }
     end
+
   end
 end
 
@@ -31,4 +32,7 @@ end
 board = Minesweeper::Board.new
 new_game = Minesweeper::GamePlay.new(board)
 board.build_empty_board
+board.place_bombs
+# board.board[1][1].change_flag_state
+board.board[0][0].reveal
 new_game.show_board

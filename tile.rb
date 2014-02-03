@@ -24,27 +24,28 @@ module Minesweeper
       elsif bomb_count > 0
         @ui_graphic = bomb_count.to_s
       else
-        unrevealed = neighbors.select { |neighbor| neighbor.unexplored }
+        unrevealed = neighbors.select do |neighbor|
+          neighbor.unexplored && !neighbor.flagged
+        end
         unrevealed.each { |neighbor| neighbor.reveal }
         @ui_graphic = "_"
       end
     end
 
     def neighbors
-      tile_row, tile_col = tile.location
+      tile_row, tile_col = @location
       neighbor_shift = [[ 1, 0], [ 1,  1], [0,  1], [-1,  1],
                         [-1, 0], [-1, -1], [0, -1], [ 1, -1]]
 
       neighbor_arr = neighbor_shift.map do |move|
-        potential_neighbor = move[0] + tile_row, move[1] + tile_col
-        next if off_board?(potential_neighbor)
-        potential_neighbor
+        [move[0] + tile_row, move[1] + tile_col]
       end
 
-      neighbor_arr.map do |loc|
+      valid_neighbors(neighbor_arr).map do |loc|
         row, col = loc
         @board.board[row][col]
       end
+
     end
 
     def neighbor_bomb_count
@@ -52,11 +53,19 @@ module Minesweeper
       neighbors.each do |neighbor|
         bomb_count += 1 if neighbor.has_bomb
       end
+      bomb_count
     end
 
-    def off_board?(neighbor)
-      (neighbor[0] < 0 || neighbor[0] > @board.num_rows) &&
-        (neighbor[1] < 0 || neighbor[1] > @board.num_cols)
+    def valid_neighbors(neighbors)
+      neighbors.select do |neighbor|
+        (neighbor[0] >= 0 && neighbor[0] < @board.num_rows) &&
+          (neighbor[1] >= 0 && neighbor[1] < @board.num_cols)
+      end
+    end
+
+    def change_flag_state
+      @flagged = (@flagged == true ? false : true)
+      @ui_graphic = (@ui_graphic == "F" ? "_" : "F")
     end
   end
 end
