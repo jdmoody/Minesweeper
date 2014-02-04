@@ -9,7 +9,7 @@ module Minesweeper
       @board_size = board_size
       @num_rows = @board_size[0]
       @num_cols = @board_size[1]
-      @num_bombs = 1
+      @num_bombs = 10
       build_empty_board
       place_bombs
     end
@@ -38,7 +38,7 @@ module Minesweeper
     def show_bombs
       @board.each do |row|
         row.each do |tile|
-          tile.ui_graphic = "B" if tile.has_bomb
+          tile.unexplored = false if tile.has_bomb
         end
       end
     end
@@ -46,7 +46,7 @@ module Minesweeper
     def show_board(game_over = false)
       show_bombs if game_over
       board.each do |row|
-        puts row.map(&:ui_graphic).join(" ")
+        puts row.map(&:to_s).join(" ")
       end
     end
 

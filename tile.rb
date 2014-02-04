@@ -3,7 +3,7 @@ require './board.rb'
 module Minesweeper
 
   class Tile
-    attr_accessor :unexplored, :has_bomb, :flagged, :location, :ui_graphic
+    attr_accessor :unexplored, :has_bomb, :flagged, :location
 
     def initialize(board, location, has_bomb = false)
       @board = board
@@ -13,26 +13,23 @@ module Minesweeper
       @flagged = false
       @row = location[0]
       @col = location[1]
-      @ui_graphic = "*"
     end
 
     def reveal
       if @flagged
         puts "This square is flagged"
         return
+      elsif @has_bomb
+        puts "BOOM"
+        return
       end
+
       @unexplored = false
-      bomb_count = neighbor_bomb_count
-      if @has_bomb
-        @ui_graphic = "B"
-      elsif bomb_count > 0
-        @ui_graphic = bomb_count.to_s
-      else
+      if neighbor_bomb_count == 0
         unrevealed = neighbors.select do |neighbor|
           neighbor.unexplored && !neighbor.flagged
         end
         unrevealed.each { |neighbor| neighbor.reveal }
-        @ui_graphic = "_"
       end
     end
 
@@ -69,11 +66,16 @@ module Minesweeper
 
     def change_flag_state
       @flagged = !@flagged
-      @ui_graphic = (@ui_graphic == "F" ? "*" : "F")
     end
 
-    # def to_s
-    #
-    # end
+    def to_s
+      if @unexplored
+        @flagged ? "F" : "*"
+      elsif @has_bomb
+        "B"
+      else
+        neighbor_bomb_count == 0 ? "_" : neighbor_bomb_count.to_s
+      end
+    end
   end
 end

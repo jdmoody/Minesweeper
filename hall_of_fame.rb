@@ -18,7 +18,7 @@ module Minesweeper
 
     def check_if_high_score(score)
       hs_list = load_high_scores
-      if hs_list.last[1] > score
+      if hs_list.last[1] > score || hs_list.length < 10
         puts "YOU GOT A HIGH SCORE"
         puts "Please enter your initials (3 at most)"
         update_high_scores(score, hs_list)
