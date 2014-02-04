@@ -1,49 +1,70 @@
 require './tile.rb'
 require './board.rb'
+require 'yaml'
 
 
 module Minesweeper
 
   class GamePlay
-    attr_accessor
+    attr_accessor :board
 
     def initialize(board)
       @board = board
     end
 
     def play
+      choose_game
+
       until game_over?
         show_board
-        puts "Do you want to flag/unflag any squares?"
-        if gets.chomp == "yes"
-          puts "Choose a location to flag/unflag (row, col)"
-          f_row, f_col = gets.chomp.split(",")
-          @board.board[f_row.to_i][f_col.to_i].change_flag_state
-          show_board
-        end
-        puts "Choose a location to unveil (row,col)"
-        p_row, p_col = gets.chomp.split(",")
+        user_action
+      end
+    end
+
+    def choose_game
+      puts "Would you like to load a game? (Otherwise, a new one will begin)"
+      if gets.chomp == "yes"
+        puts "What is the file name?"
+        filename = gets.chomp
+        saved_game = YAML::load(File.read(filename))
+        self.board = saved_game.board
+      end
+    end
+
+    def choose_flags
+      puts "Choose a location to flag/unflag (row,col)"
+      f_row, f_col = gets.chomp.split(",")
+      @board.board[f_row.to_i][f_col.to_i].change_flag_state
+    end
+
+    def user_action
+      puts "Choose a location to unveil (row,col)"
+      puts "Type 'f' if you want to flag/unflag a square"
+      puts "Type 's' if you want to save"
+      p_row, p_col = gets.chomp.split(",")
+      if p_row == "f"
+        choose_flags
+      elsif p_row == "s"
+        save_game
+      else
         @board.board[p_row.to_i][p_col.to_i].reveal
       end
     end
 
+    def save_game
+      puts "Write the name of your savefile"
+      savefile = gets.chomp
+      File.open(savefile, "w") do |f|
+        f.puts self.to_yaml
+      end
+      puts "Game saved as #{savefile}!"
+    end
+
     def show_board(game_over = false)
-      printed_board = []
+      @board.show_bombs if game_over
       @board.board.each do |row|
-        printed_board << row.dup
+        puts row.map(&:ui_graphic).join(" ")
       end
-      @board.num_rows.times do |row|
-        @board.num_cols.times do |col|
-          tile = printed_board[row][col]
-          printed_board[row][col] = tile.ui_graphic
-          if game_over
-            if tile.has_bomb
-              printed_board[row][col] = "B"
-            end
-          end
-        end
-      end
-      printed_board.each { |row| p row }
     end
 
     def game_over?

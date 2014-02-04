@@ -17,6 +17,10 @@ module Minesweeper
     end
 
     def reveal
+      if @flagged
+        puts "This square is flagged"
+        return
+      end
       @unexplored = false
       bomb_count = neighbor_bomb_count
       if @has_bomb
@@ -65,7 +69,7 @@ module Minesweeper
 
     def change_flag_state
       @flagged = (@flagged == true ? false : true)
-      @ui_graphic = (@ui_graphic == "F" ? "_" : "F")
+      @ui_graphic = (@ui_graphic == "F" ? "*" : "F")
     end
   end
 end

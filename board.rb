@@ -33,5 +33,13 @@ module Minesweeper
         end
       end
     end
+
+    def show_bombs
+      @board.each do |row|
+        row.each do |tile|
+          tile.ui_graphic = "B" if tile.has_bomb
+        end
+      end
+    end
   end
 end
