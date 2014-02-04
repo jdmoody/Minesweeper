@@ -1,6 +1,7 @@
 require './tile.rb'
 require './board.rb'
 require 'yaml'
+require 'json'
 
 
 module Minesweeper
@@ -10,15 +11,18 @@ module Minesweeper
 
     def initialize(board)
       @board = board
+      @saved_time = 0
     end
 
     def play
       choose_game
 
+      @start_time = Time.new
       until game_over?
-        show_board
+        @board.show_board
         user_action
       end
+      show_high_scores
     end
 
     def choose_game
@@ -52,49 +56,66 @@ module Minesweeper
     end
 
     def save_game
+      @saved_time = (Time.new - @start_time).to_i
+      puts "You've played for #{@saved_time} seconds so far"
       puts "Write the name of your savefile"
       savefile = gets.chomp
       File.open(savefile, "w") do |f|
         f.puts self.to_yaml
       end
       puts "Game saved as #{savefile}!"
-    end
-
-    def show_board(game_over = false)
-      @board.show_bombs if game_over
-      @board.board.each do |row|
-        puts row.map(&:ui_graphic).join(" ")
-      end
+      exit
     end
 
     def game_over?
-      if won?
+      if @board.won?
+        @board.show_board(true)
         puts "YOU DID IT!"
+        score = (Time.new - @start_time).to_i + @saved_time
+        puts "Your time was #{score} seconds!"
+        check_if_high_score(score)
         return true
-      elsif lost?
+      elsif @board.lost?
         puts "YOU LOSE"
-        show_board(true)
+        @board.show_board(true)
         return true
       else
         false
       end
     end
 
-    def won?
-      @board.board.all? do |rows|
-        rows.all? do |tile|
-          (tile.has_bomb && tile.unexplored) ||
-            (!tile.has_bomb && !tile.unexplored)
-        end
+    def update_high_scores(score, hs_list)
+      inits = gets.chomp.upcase
+      hs_list << [inits[0..3], score]
+      hs_list.sort! { |score_1, score_2| score_1[1] <=> score_2[1] }
+      hs_list = hs_list[0...10]
+      save_high_scores(hs_list)
+    end
+
+    def save_high_scores(hs_list)
+      File.open("high_scores", "w") do |f|
+        f.puts hs_list.to_json
       end
     end
 
-    def lost?
-      @board.board.any? do |rows|
-        rows.any? do |tile|
-          !tile.unexplored && tile.has_bomb
-        end
+    def check_if_high_score(score)
+      hs_list = load_high_scores
+      if hs_list.last[1] > score
+        puts "YOU GOT A HIGH SCORE"
+        puts "Please enter your initials (3 at most)"
+        update_high_scores(score, hs_list)
       end
+    end
+
+    def load_high_scores
+      high_scores_file = File.read("high_scores")
+      hs_list = JSON.parse(high_scores_file)
+    end
+
+    def show_high_scores
+      hs_list = load_high_scores
+      puts "HIGH SCORES"
+      hs_list.each { |score| p score }
     end
   end
 end
