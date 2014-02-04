@@ -4,6 +4,7 @@ module Minesweeper
 
   class Board
     attr_accessor :board, :num_rows, :num_cols
+
     def initialize(board_size = [9, 9])
       @board_size = board_size
       @num_rows = @board_size[0]

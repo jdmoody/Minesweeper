@@ -68,8 +68,12 @@ module Minesweeper
     end
 
     def change_flag_state
-      @flagged = (@flagged == true ? false : true)
+      @flagged = !@flagged
       @ui_graphic = (@ui_graphic == "F" ? "*" : "F")
     end
+
+    # def to_s
+    #
+    # end
   end
 end
