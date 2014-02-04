@@ -20,6 +20,7 @@ module Minesweeper
         puts "This square is flagged"
         return
       elsif @has_bomb
+        @unexplored = false
         puts "BOOM"
         return
       end
